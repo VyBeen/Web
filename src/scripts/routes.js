@@ -1,0 +1,15 @@
+export default {
+    TOKEN: (...args) => "/auth/token" + (args.length ? "/" + args.join("/") : ""),
+    REGISTER: (...args) => "/auth/register?token=" + args[0],
+    USERS: (...args) => "/users" + (args.length ? "/" + args.join("/") : ""),
+    ROOMS: (...args) => "/rooms" + (args.length ? "/" + args.join("/") : ""),
+    ROOMUSERS: (...args) => "/rooms/" + args[0] + "/users" + (args.length > 1 ? "/" + args[1] : ""),
+    PLAYLISTS: (...args) => "/playlists" + (args.length ? "/" + args.join("/") : ""),
+    PLAYLIST_SONGS: (...args) => "/playlists/" + args[0] + "/songs",
+    PLAYLIST_SONG: (...args) => "/playlists/" + args[0] + "/" + args[1],
+    PLAYERS: (...args) => "/players" + (args.length ? "/" + args.join("/") : ""),
+    PLAYERS_CHANGE: (...args) => "/players/" + args[0] + "/change",
+    EVENTS: (...args) => "/users/events" + (args.length ? "/" + args.join("/") : ""),
+    SEARCH_SONG: (...args) => "/search/song?q=" + args[0],
+    STREAM_SONG: (...args) => "/stream?id=" + args[0],
+};

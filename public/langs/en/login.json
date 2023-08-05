@@ -1,0 +1,10 @@
+{
+    "Title": "You're not logged in",
+    "Desc": "Please log in your account to access VyBeen.",
+    "LogIn": "Log In",
+    "Back": "Go back home",
+    "PleaseWait": "Please wait",
+    "RetreivingUser": "Retreiving user ...",
+    "LoggedIn": "You are logged in !",
+    "Redirect": "Redirecting to home ..."
+}
