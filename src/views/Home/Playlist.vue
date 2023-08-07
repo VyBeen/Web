@@ -192,7 +192,7 @@ export default {
             this.dragTraget.classList.remove("absolute");
             this.dragTraget.style.width = `100%`;
             this.dragTraget.style.zIndex = `1`;
-            for (let i = 0; i < playlist.length; i++) {
+            for (let i = 0; i < this.songs.length; i++) {
                 const card = this.$refs["song-card"][i];
                 card.classList.remove("transition-all");
                 card.style.transform = "translateY(0)";
@@ -219,7 +219,7 @@ export default {
 
             const nbCardsToNotShift = Math.floor((mouse.y - containerRect.top) / targetRect.height - 0.5);
             let shift = 0;
-            for (let i = 0; i < playlist.length; i++) {
+            for (let i = 0; i < this.songs.length; i++) {
                 const card = this.$refs["song-card"][i];
                 if (card === this.dragTraget) { shift = 1; continue; }
                 if (i-shift < nbCardsToNotShift) {
@@ -281,6 +281,8 @@ export default {
                 this.onSongRemoved(ev.data.song);
                 break;
             case 'player.changed':
+            case 'player.nexted':
+            case 'player.preved':
                 this.playingId = ev.data.song;
                 break;
             default: break;

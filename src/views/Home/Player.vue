@@ -1,5 +1,6 @@
 <template>
     <div class="flex flex-col justify-evenly items-center">
+        <canvas id="coverGenerator" class="hidden" />
         <div class="hidden">
             <audio ref="audio-source" />
         </div>
@@ -30,7 +31,7 @@
         </div>
         <div class="flex flex-col">
             <div class="flex flex-col w-full justify-center items-center my-10"> <!-- TEXTS -->
-                <title-text class="w-fit text-center"> {{ title.replace(/\([a-zA-Z. ]*\)/g, '') }} </title-text>
+                <title-text class="w-fit text-center"> {{ title }} </title-text>
                 <base-text class="w-fit text-center"> {{ artist }} </base-text>
             </div>
             <div class="flex w-full justify-center items-center space-x-10"> <!-- CONTROLS -->
@@ -161,22 +162,24 @@ export default {
             let askingForPlay = true;
             window.addEventListener('mousedown', ev => {
                 if (!askingForPlay) return;
-                audioSource.play();
+                Ressources.getPlayer().then(player => {
+                    if (player.playing) {
+                        audioSource.unsetEventFlag();
+                        audioSource.play();
+                    }
+                })
             });
             audioSource.addEventListener("canplay", ev => {
-                console.log("canplay");
                 this.length = audioSource.duration;
             });
             audioSource.addEventListener("playing", ev => {
-                console.log("playing");
                 askingForPlay = false;
                 if (!firstEvent) return;
                 firstEvent = false;
+                audioSource.unsetEventFlag();
                 audioSource.currentTime = this.getProgressInSeconds();
             });
-            this.loadSongStream().then(() => {
-                audioSource.play();
-            });
+            this.loadSongStream();
         }).catch(err => {
             console.error(err); // TODO : display error
         });
@@ -189,11 +192,18 @@ export default {
             const song = await Ressources.getSong(player.songId);
             if (!song) return; // TODO : display error
             this.getAudioSource().src = API.API_URL + song.url;
+            if (player.playing) {
+                const audioSource = this.getAudioSource();
+                audioSource.unsetEventFlag();
+                audioSource.play();
+            }
         },
         getProgressInSeconds() {
             return Math.max(
                 Math.min(
-                    (new Date() - this.cursorDate) / 1000 - this.position,
+                    this.getAudioSource().paused
+                        ? this.position
+                        : (this.position + (new Date() - this.cursorDate) / 1000),
                     this.length
                 ),
                 0
@@ -202,6 +212,27 @@ export default {
         async fetchPlayerInformations() {
             const player = await Ressources.getPlayer(true);
             if (!player) return; // TODO : display error
+
+            const audioSource = this.getAudioSource();
+            audioSource.addEventListener('play', ev => {
+                this.playState = STATE.PLAYING;
+                if (!ev.target.hasEventFlag()) return;
+                console.log("sending play event");
+                API.execute_logged(API.ROUTE.PLAYERS(player.id, "play"), API.METHOD.POST);
+            });
+            audioSource.addEventListener('pause', ev => {
+                this.playState = STATE.PAUSED;
+                if (!ev.target.hasEventFlag()) return;
+                console.log("sending pause event");
+                API.execute_logged(API.ROUTE.PLAYERS(player.id, "pause"), API.METHOD.POST);
+            });
+            audioSource.addEventListener('seeking', ev => {
+                if (!ev.target.hasEventFlag()) return;
+                console.log("sending seeking event");
+                API.execute_logged(API.ROUTE.PLAYERS(player.id, "move"), API.METHOD.POST, {
+                    position: ev.target.currentTime
+                });
+            });
 
             this.playState = player.playing ? STATE.PLAYING : STATE.PAUSED;
             this.position = player.position;
@@ -219,6 +250,20 @@ export default {
             this.title = song.title;
             this.artist = song.artist;
             this.coverSrc = song.cover;
+
+            const canvas = document.getElementById("coverGenerator");
+            canvas.width = 256;
+            canvas.height = 256;
+            document.body.appendChild(canvas);
+            const ctx = canvas.getContext("2d");
+
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: song.title,
+                artist: song.artist,
+                artwork: [
+                    { src: song.cover, sizes: '256x256', type: 'image/jpg' }
+                ]
+            });
         },
         getDisplayTime(time) {
             const minutes = Math.floor(time / 60);
@@ -228,25 +273,26 @@ export default {
         onPlayClicked() {
             const oldState = this.playState;
             this.playState = STATE.LOADING;
-            setTimeout(() => {
-                if (oldState === STATE.PLAYING) {
-                    this.playState = STATE.PAUSED;
-                } else {
-                    this.playState = STATE.PLAYING;
-                }
-            }, 500);
+            this.getAudioSource().setEventFlag();
+            this.getAudioSource()[oldState === STATE.PLAYING ? "pause" : "play"]();
         },
-        onNextClicked() {
+        async onNextClicked() {
             this.nextState = STATE.LOADING;
-            setTimeout(() => {
-                this.nextState = STATE.OK;
-            }, 500);
+            const player = await Ressources.getPlayer();
+            if (!player) return; // TODO : display error
+            API.execute_logged(API.ROUTE.PLAYERS(player.id, "next"), API.METHOD.POST)
+                .then(() => {})
+                .catch(err => console.error(err))
+                .finally(() => this.nextState = STATE.OK);
         },
-        onPrevClicked() {
+        async onPrevClicked() {
             this.prevState = STATE.LOADING;
-            setTimeout(() => {
-                this.prevState = STATE.OK;
-            }, 500);
+            const player = await Ressources.getPlayer();
+            if (!player) return; // TODO : display error
+            API.execute_logged(API.ROUTE.PLAYERS(player.id, "prev"), API.METHOD.POST)
+                .then(() => {})
+                .catch(err => console.error(err))
+                .finally(() => this.prevState = STATE.OK);
         },
         startCanvasRender() {
             const resizeCanvas = () => {
@@ -325,27 +371,54 @@ export default {
         },
         /**@returns {HTMLAudioElement} */
         getAudioSource() {
-            return this.$refs["audio-source"];
+            const source = this.$refs["audio-source"];
+            if (!source.hasEventFlag) {
+                source.hasEventFlag = () => {
+                    const res = source.eventFlag;
+                    source.eventFlag = true;
+                    return res;
+                }
+                source.unsetEventFlag = () => {
+                    source.eventFlag = false;
+                }
+                source.setEventFlag = () => {
+                    source.eventFlag = true;
+                }
+            }
+            return source;
         },
         async onEvent(ev) {
             const typeSplit = ev.type.split(".");
             if (typeSplit.length < 2 || typeSplit[0] !== 'player') return;
 
             const type = typeSplit[1];
-            console.log("Event : " + type + " on player");
+            const audioSource = this.getAudioSource();
+
             switch (type) {
             case 'played':
-                this.getAudioSource().play();
+                this.position = ev.data.position;
+                this.cursorDate = new Date(ev.data.cursorDate);
+                audioSource.unsetEventFlag();
+                audioSource.currentTime = this.getProgressInSeconds();
+                if (!audioSource.paused) break;
+                audioSource.unsetEventFlag();
+                audioSource.play();
                 break;
             case 'paused':
-                this.getAudioSource().pause();
+                this.position = ev.data.position;
+                this.cursorDate = new Date(ev.data.cursorDate);
+                audioSource.unsetEventFlag();
+                audioSource.currentTime = this.getProgressInSeconds();
+                if (audioSource.paused) break;
+                audioSource.unsetEventFlag();
+                audioSource.pause();
                 break;
             case 'changed':
+            case 'nexted':
+            case 'preved':
                 await this.fetchPlayerInformations();
                 await this.fetchPlayerSong();
-                await this.loadSongStream().then(() => {
-                    this.getAudioSource().play();
-                });
+                await this.loadSongStream();
                 break;
             default: break;
             }
