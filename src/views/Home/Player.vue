@@ -186,6 +186,7 @@ export default {
     },
     methods: {
         async loadSongStream() {
+            const audioSource = this.getAudioSource();
             const player = await Ressources.getPlayer();
             if (!player.songId) return;
 
@@ -193,7 +194,6 @@ export default {
             if (!song) return; // TODO : display error
             this.getAudioSource().src = API.API_URL + song.url;
             if (player.playing) {
-                const audioSource = this.getAudioSource();
                 audioSource.unsetEventFlag();
                 audioSource.play();
             }
@@ -201,7 +201,7 @@ export default {
         getProgressInSeconds() {
             return Math.max(
                 Math.min(
-                    this.getAudioSource().paused
+                    this.getAudioSource()?.paused
                         ? this.position
                         : (this.position + (new Date() - this.cursorDate) / 1000),
                     this.length
@@ -250,6 +250,7 @@ export default {
             this.title = song.title;
             this.artist = song.artist;
             this.coverSrc = song.cover;
+            this.getAudioSource().src = song.url;
 
             const canvas = document.getElementById("coverGenerator");
             canvas.width = 256;
@@ -372,17 +373,19 @@ export default {
         /**@returns {HTMLAudioElement} */
         getAudioSource() {
             const source = this.$refs["audio-source"];
+            if (!source) return null;
+
             if (!source.hasEventFlag) {
                 source.hasEventFlag = () => {
                     const res = source.eventFlag;
-                    source.eventFlag = true;
-                    return res;
+                    source.eventFlag--;
+                    return res === 0;
                 }
                 source.unsetEventFlag = () => {
-                    source.eventFlag = false;
+                    source.eventFlag++;
                 }
                 source.setEventFlag = () => {
-                    source.eventFlag = true;
+                    source.eventFlag = 0;
                 }
             }
             return source;
@@ -417,8 +420,11 @@ export default {
             case 'nexted':
             case 'preved':
                 await this.fetchPlayerInformations();
+                console.log("this.fetchPlayerInformations");
                 await this.fetchPlayerSong();
+                console.log("this.fetchPlayerSong");
                 await this.loadSongStream();
+                console.log("this.loadSongStream");
                 break;
             default: break;
             }
