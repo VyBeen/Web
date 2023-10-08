@@ -105,6 +105,7 @@ import Lang from '../../scripts/Lang';
 import API from '../../scripts/API';
 import Selector from '../../components/inputs/Selector.vue';
 import EventManager from '../../scripts/EventManager';
+import User from '../../scripts/User';
 
 export default {
     name: "PlaylistView",
@@ -177,7 +178,7 @@ export default {
             this.dragTraget.classList.add("absolute");
             this.doDrag(ev);
         },
-        stopDrag(ev) {
+        async stopDrag(ev) {
             if (!this.dragTraget) return;
             const mouse = {
                 x: ev.clientX,
@@ -193,13 +194,30 @@ export default {
             this.dragTraget.style.width = `100%`;
             this.dragTraget.style.zIndex = `1`;
             for (let i = 0; i < this.songs.length; i++) {
-                const card = this.$refs["song-card"][i];
+                const card = this.$refs["song-card"][i]; // TODO : get from dom ID (else bugs when updated)
                 card.classList.remove("transition-all");
                 card.style.transform = "translateY(0)";
             }
 
-            const dropIndex = Math.floor((mouse.y - containerRect.top) / targetRect.height - 0.5);
+            const dropIndex = Math.min(
+                Math.max(
+                    Math.floor((mouse.y - containerRect.top) / targetRect.height - 0.5),
+                    0
+                ),
+                this.songs.length - 1
+            );
             const takeIndex = this.dragTraget.id.split("-")[1];
+            if (dropIndex == takeIndex) return;
+
+            const movedSongId = this.songs[takeIndex].id;
+            const prevSongId = this.songs[dropIndex + (takeIndex<dropIndex?0:-1)]?.id ?? null;
+            API.execute_logged(API.ROUTE.PLAYLIST_SONG((await Ressources.getPlaylist()).id, movedSongId), API.METHOD.PATCH, {
+                prevId: prevSongId
+            }).then(res => {
+                this.songs.splice(dropIndex, 0, this.songs.splice(takeIndex, 1)[0]);
+            }).catch(err => {
+
+            });
 
             this.dragTraget = null;
         },
@@ -243,7 +261,7 @@ export default {
         },
         async onSongCompletion(selector, search) {
             const results = await API.execute_logged(API.ROUTE.SEARCH_SONG(search));
-            selector.setData(results.data.splice(0, 5).map(song => ({
+            selector.setData(results.data.map(song => ({
                 value: song.title,
                 desc: song.artist,
                 img: song.cover,
@@ -279,6 +297,12 @@ export default {
                 break;
             case 'playlist.removed':
                 this.onSongRemoved(ev.data.song);
+                break;
+            case 'playlist.moved':
+                if (ev.data.user === User.CurrentUser.id) return;
+                const songIndex = this.songs.findIndex(song => song.id === ev.data.song);
+                const prevIndex = this.songs.findIndex(song => song.id === ev.data.prev);
+                this.songs.splice(prevIndex + (songIndex>prevIndex?1:0), 0, this.songs.splice(songIndex, 1)[0]);
                 break;
             case 'player.changed':
             case 'player.nexted':
