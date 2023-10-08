@@ -1,5 +1,7 @@
 {
     "ChangeRoom": "Changer de salle",
     "InviteInRoom": "Inviter dans la salle",
+    "YourInviteLink": "Votre lien d'invitation",
+    "YourInviteLinkDesc": "Partagez ce lien avec vos amis pour les inviter dans votre salle",
     "LoadMore": "Charger plus"
 }

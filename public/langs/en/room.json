@@ -1,5 +1,7 @@
 {
     "ChangeRoom": "Change room",
     "InviteInRoom": "Invite in room",
+    "YourInviteLink": "Your invite link",
+    "YourInviteLinkDesc": "Share this link with your friends to invite them in your room",
     "LoadMore": "Load more"
 }

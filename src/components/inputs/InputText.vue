@@ -137,8 +137,12 @@ export default {
             this.$refs.input.blur();
         },
         async fetchTranslations() {
-            this.placeholder_str = (typeof(this.placeholder) === 'string') ? this.placeholder : await Lang.GetTextAsync(this.placeholder);
-            this.value_str = (typeof(this.value) === 'string') ? this.value : await Lang.GetTextAsync(this.value);
+            this.placeholder_str = this.placeholder !== null
+                ? ((typeof(this.placeholder) === 'string') ? this.placeholder : await Lang.GetTextAsync(this.placeholder))
+                : '';
+            this.value_str = this.value !== null
+                ? ((typeof(this.value) === 'string') ? this.value : await Lang.GetTextAsync(this.value))
+                : '';
         }
     }
 }

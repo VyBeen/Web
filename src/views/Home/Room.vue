@@ -35,9 +35,12 @@
                     </svg>
                 </button>
             </div>
-            <div class="flex justify-between">
-                <button-text> <get-text :context="Lang.CreateTranslationContext('room', 'ChangeRoom')" /> </button-text>
-                <button-block color="green">
+            <div class="flex justify-end"> <!-- justify-between -->
+                <!-- <button-text :disabled="true"> <get-text :context="Lang.CreateTranslationContext('room', 'ChangeRoom')" /> </button-text> -->
+                <button-block
+                    color="green"
+                    :onclick="spawnInvitePopup"
+                >
                     <get-text :context="Lang.CreateTranslationContext('room', 'InviteInRoom')" /> 
                 </button-block>
             </div>
@@ -110,6 +113,23 @@
                 </button-block>
             </div>
         </div>
+        <modal-card ref="invite-modal">
+            <title-text class="mb-2 p-1 pb-2 border-b-2 border-slate-500 mb-8">
+                <get-text :context="Lang.CreateTranslationContext('room', 'InviteInRoom')" />
+            </title-text>
+            <div class="flex flex-col items-center max-w-[20em] space-y-4 mb-4">
+                <p class="text-lg font-semibold text-slate-200">
+                    <get-text :context="Lang.CreateTranslationContext('room', 'YourInviteLink')" />
+                </p>
+                <input-text
+                    :value="`https://vybeen.projects.furwaz.fr/invite?roomId=${User.CurrentUser.roomId}`"
+                    :show-copy="true"
+                />
+                <base-text class="text-center">
+                    <get-text :context="Lang.CreateTranslationContext('room', 'YourInviteLinkDesc')" />
+                </base-text>
+            </div>
+        </modal-card>
     </div>
 </template>
 
@@ -123,15 +143,19 @@ import Lang from '../../scripts/Lang';
 import InputText from '../../components/inputs/InputText.vue';
 import API from '../../scripts/API';
 import * as Ressources from '../../scripts/Ressources';
+import ModalCard from '../../components/cards/ModalCard.vue';
+import BaseText from '../../components/text/BaseText.vue';
 
 export default {
     name: "RoomView",
     components: {
         TitleText,
         ButtonBlock,
-        ButtonText,
+        // ButtonText,
         GetText,
-        InputText
+        InputText,
+        ModalCard,
+        BaseText
     },
     data() {
         return {
@@ -184,6 +208,9 @@ export default {
         disconnect() {
             User.forget();
             this.$router.go();
+        },
+        spawnInvitePopup() {
+            this.$refs["invite-modal"].open();
         }
     }
 }
