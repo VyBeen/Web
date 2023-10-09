@@ -81,7 +81,7 @@ export default {
     mounted() {
         if (User.CurrentUser !== null) {
             setTimeout(() => {
-                this.$router.push({ name: 'Home' });
+                this.goToLink();
             }, 1000);
             return;
         }
@@ -108,10 +108,17 @@ export default {
             const response = await API.execute(API.ROUTE.REGISTER(token));
             const user = new User(response.data);
             user.save();
-            this.$router.push({ name: 'Login' });
             setTimeout(() => {
-                this.$router.push({ name: 'Home' });
+                this.goToLink();
             }, 1000);
+        },
+        goToLink() {
+            const queryLink = this.$route.query.link;
+            if (queryLink) {
+                this.$router.push(queryLink);
+            } else {
+                this.$router.push({ name: 'Home' });
+            }
         }
     }
 }

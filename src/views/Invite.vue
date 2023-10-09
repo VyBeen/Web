@@ -41,17 +41,23 @@ export default {
         };
     },
     mounted() {
-        const roomId = this.$route.query.roomId;
-        if (roomId === undefined || roomId === null) {
-            console.log("this.goHome();")
+        if (User.CurrentUser === null) {
+            this.$router.push({ name: 'Login', query: { link: this.$route.fullPath } });
             return;
         }
+
+        const roomId = this.$route.params.room;
+        if (roomId === undefined || roomId === null) {
+            this.goHome();
+            return;
+        }
+
         API.execute_logged(API.ROUTE.ROOMS(roomId)).then(res => {
             this.room = res.data.name;
             this.joinRoom(roomId);
         }).catch(err => {
             console.error(err);
-            console.log("this.goHome();")
+            this.goHome();
         })
     },
     methods: {
@@ -59,13 +65,13 @@ export default {
             this.$router.push({ name: 'Home' });
         },
         joinRoom(id) {
-            API.execute_logged(API.ROUTE.ROOMS(id, 'join'), API.METHOD.POST, {roomId: id}).then(res => {
+            API.execute_logged(API.ROUTE.ROOMS(id), API.METHOD.POST, {roomId: id}).then(res => {
                 API.execute_logged(API.ROUTE.USERS(User.CurrentUser.id)).then(res => {
                     User.CurrentUser.setInformations(res.data);
                     User.CurrentUser.save();
                     this.goHome();
-                }).catch(err => { console.error(err); this.goHome(); })
-            }).catch(err => { console.error(err); this.goHome(); })
+                }).catch(err => { console.error(err); this.goHome(); });
+            }).catch(err => { console.error(err); this.goHome(); });
         }
     }
 }
