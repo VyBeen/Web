@@ -74,12 +74,22 @@
                                     <path d="M507.3 267.3c6.2-6.2 6.2-16.4 0-22.6l-128-128c-6.2-6.2-16.4-6.2-22.6 0s-6.2 16.4 0 22.6L457.4 240 176 240c-8.8 0-16 7.2-16 16s7.2 16 16 16l281.4 0L356.7 372.7c-6.2 6.2-6.2 16.4 0 22.6s16.4 6.2 22.6 0l128-128zM176 64c8.8 0 16-7.2 16-16s-7.2-16-16-16L80 32C35.8 32 0 67.8 0 112L0 400c0 44.2 35.8 80 80 80l96 0c8.8 0 16-7.2 16-16s-7.2-16-16-16l-96 0c-26.5 0-48-21.5-48-48l0-288c0-26.5 21.5-48 48-48l96 0z"/>
                                 </svg>
                             </button>
+                            <button
+                                class="flex h-10 w-10 p-1.5 rounded-md justify-center hover:bg-slate-100 dark:hover:bg-slate-600 hover:text-red-500 transition-all"
+                                @click="leaveRoom"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" class="h-full items-center justify-center"
+                                >
+                                    <path xmlns="http://www.w3.org/2000/svg" d="M402.7 425.3l-316-316C52.6 148.6 32 199.9 32 256c0 123.7 100.3 224 224 224c56.1 0 107.4-20.6 146.7-54.7zm22.6-22.6C459.4 363.4 480 312.1 480 256C480 132.3 379.7 32 256 32c-56.1 0-107.4 20.6-146.7 54.7l316 316zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256z"/>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <div
-                    v-for="(user, index) in people.filter((user) => user.id !== User.CurrentUser.id)"
+                    v-for="user in people.filter((user) => user.id !== User.CurrentUser.id)"
                     :key="user"
                     class="flex justify-between items-center w-full md:h-20 h-[4.5em] my-2"
                 >
@@ -96,7 +106,10 @@
                             <title-text class="w-fit text-center"> {{ user.pseudo }} </title-text>
                         </div>
                         <div class="flex w-fit h-full items-center justify-end text-slate-400 space-x-2">
-                            <button class="flex h-10 w-10 p-1.5 rounded-md justify-center hover:bg-slate-100 dark:hover:bg-slate-600 hover:text-red-500 transition-all">
+                            <button
+                                class="flex h-10 w-10 p-1.5 rounded-md justify-center hover:bg-slate-100 dark:hover:bg-slate-600 hover:text-red-500 transition-all"
+                                @click="kickUser(user.id)"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" class="h-full items-center justify-center"
                                 >
@@ -122,7 +135,7 @@
                     <get-text :context="Lang.CreateTranslationContext('room', 'YourInviteLink')" />
                 </p>
                 <input-text
-                    :value="`https://vybeen.projects.furwaz.fr/invite?roomId=${User.CurrentUser.roomId}`"
+                    :value="window.location.origin + `/invite/${User.CurrentUser.roomId}`"
                     :show-copy="true"
                 />
                 <base-text class="text-center">
@@ -145,6 +158,7 @@ import API from '../../scripts/API';
 import * as Ressources from '../../scripts/Ressources';
 import ModalCard from '../../components/cards/ModalCard.vue';
 import BaseText from '../../components/text/BaseText.vue';
+import EventManager from '../../scripts/EventManager';
 
 export default {
     name: "RoomView",
@@ -164,7 +178,8 @@ export default {
             Lang,
             name: "- - - -",
             editingName: false,
-            pagination: API.createPagination(0, 6)
+            pagination: API.createPagination(0, 6),
+            window
         };
     },
     watch: {
@@ -179,6 +194,8 @@ export default {
 
         this.fetchRoomInformations();
         this.fetchRoomUsers();
+
+        EventManager.Instance.addListener(this.onEvent);
     },
     methods: {
         async fetchRoomInformations() {
@@ -211,6 +228,41 @@ export default {
         },
         spawnInvitePopup() {
             this.$refs["invite-modal"].open();
+        },
+        leaveRoom() {
+            API.execute_logged(API.ROUTE.ROOMS(User.CurrentUser.roomId), API.METHOD.DELETE).then(() => {
+                API.execute_logged(API.ROUTE.USERS(User.CurrentUser.id)).then(res => {
+                    User.CurrentUser.setInformations(res.data);
+                    User.CurrentUser.save();
+                    this.$router.go();
+                }).catch(err => console.error(err));
+            }).catch((err) => {
+                console.error(err);
+            });
+        },
+        kickUser(id) {
+            API.execute_logged(API.ROUTE.ROOMS(User.CurrentUser.roomId, id), API.METHOD.DELETE).then(() => {
+                // done
+            }).catch((err) => {
+                console.error(err);
+            });
+        },
+        async onEvent(ev) {
+            console.log(ev);
+            switch (ev.type) {
+            case 'user.joined':
+                if (!this.people.find((u) => u.id === ev.data.user)) {
+                    const user = await Ressources.getUser(ev.data.user);
+                    if (user) this.people.push(user);
+                }
+                break;
+        
+            case 'user.left':
+            case 'user.kicked':
+                this.people = this.people.filter((u) => u.id !== (ev.data.target ?? ev.data.user));
+            default:
+                break;
+            }
         }
     }
 }
