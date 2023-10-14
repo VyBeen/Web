@@ -260,7 +260,7 @@ export default {
             }
         },
         async onSongCompletion(selector, search) {
-            const results = await API.execute_logged(API.ROUTE.SEARCH_SONG(search));
+            const results = await API.execute_logged(API.ROUTE.SEARCH_SONG(btoa(search)));
             selector.setData(results.data.map(song => ({
                 value: song.title,
                 desc: song.artist,
