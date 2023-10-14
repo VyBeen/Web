@@ -1,4 +1,5 @@
 import API from "./API";
+import User from "./User";
 
 export default class EventManager {
     static _instance = null;
@@ -15,30 +16,14 @@ export default class EventManager {
     listeners = [];
     events = [];
     constructor() {
-        this.fetchEvents(300);
         this.io = io(import.meta.env.VITE_SOCKETIO_HOST, { path: import.meta.env.VITE_SOCKETIO_PATH });
 
         this.io.on('connect', () => {
-            console.log('connected to socket.io');
-        });
-    }
-
-    fetchEvents (repeat = 0) {
-        API.execute_logged(API.ROUTE.EVENTS()).then(res => {
-            res.data.forEach(ev => this.events.push(ev));
-
-            if (this.events.length) {
-                this.events.forEach(ev => this.listeners.forEach(l => l(ev)));
-                this.events = [];
-            }
-
-            if (repeat > 0) {
-                setTimeout(() => {
-                    this.fetchEvents(repeat);
-                }, repeat);
-            }
-        }).catch(err => {
-            console.error(err);
+            this.io.emit('auth', User.CurrentUser.token);
+            this.io.onAny((type, data) => {
+                const ev = { type, data };
+                this.listeners.forEach(l => l(ev))
+            });
         });
     }
 

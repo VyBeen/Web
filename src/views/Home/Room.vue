@@ -248,7 +248,6 @@ export default {
             });
         },
         async onEvent(ev) {
-            console.log(ev);
             switch (ev.type) {
             case 'user.joined':
                 if (!this.people.find((u) => u.id === ev.data.user)) {

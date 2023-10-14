@@ -217,18 +217,15 @@ export default {
             audioSource.addEventListener('play', ev => {
                 this.playState = STATE.PLAYING;
                 if (!ev.target.hasEventFlag()) return;
-                console.log("sending play event");
                 API.execute_logged(API.ROUTE.PLAYERS(player.id, "play"), API.METHOD.POST);
             });
             audioSource.addEventListener('pause', ev => {
                 this.playState = STATE.PAUSED;
                 if (!ev.target.hasEventFlag()) return;
-                console.log("sending pause event");
                 API.execute_logged(API.ROUTE.PLAYERS(player.id, "pause"), API.METHOD.POST);
             });
             audioSource.addEventListener('seeking', ev => {
                 if (!ev.target.hasEventFlag()) return;
-                console.log("sending seeking event");
                 API.execute_logged(API.ROUTE.PLAYERS(player.id, "move"), API.METHOD.POST, {
                     position: ev.target.currentTime
                 });
@@ -420,11 +417,8 @@ export default {
             case 'nexted':
             case 'preved':
                 await this.fetchPlayerInformations();
-                console.log("this.fetchPlayerInformations");
                 await this.fetchPlayerSong();
-                console.log("this.fetchPlayerSong");
                 await this.loadSongStream();
-                console.log("this.loadSongStream");
                 break;
             default: break;
             }
