@@ -1,4 +1,3 @@
-import config from '../config.js';
 import Lang from './Lang.js';
 import User from './User.js';
 import ROUTES from './routes.js';
@@ -195,7 +194,7 @@ class API {
      */
     static execute(path, method = this.METHOD.GET, body = {}, type = this.TYPE.JSON, headers = []) {
         return new Promise((resolve, reject) => {
-            if (API.API_URL == null) { API.setURL(config.API_HOST); }
+            if (API.API_URL == null) { API.setURL(import.meta.env.VITE_API_HOST); }
             if (API.API_URL == null) reject("Error : API host not set");
             path = path.replace("/?", "?").replace(/\/\//g, "/");
             let urlparts = path.split("?");

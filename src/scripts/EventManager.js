@@ -16,6 +16,11 @@ export default class EventManager {
     events = [];
     constructor() {
         this.fetchEvents(300);
+        this.io = io(import.meta.env.VITE_SOCKETIO_HOST, { path: import.meta.env.VITE_SOCKETIO_PATH });
+
+        this.io.on('connect', () => {
+            console.log('connected to socket.io');
+        });
     }
 
     fetchEvents (repeat = 0) {
