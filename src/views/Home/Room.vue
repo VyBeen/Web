@@ -52,7 +52,7 @@
             <div class="flex flex-col h-fit">
                 <div class="flex justify-between items-center w-full md:h-20 h-[4.5em] my-2">
                     <div
-                        class="flex w-full h-full border-b-4 border-2 rounded-lg bg-white dark:bg-slate-700 p-2 border-slate-100 dark:border-slate-800"
+                        class="flex w-full h-full border-b-4 border-2 rounded-lg bg-white dark:bg-slate-700 p-2 border-slate-200 dark:border-slate-800"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 512" fill="currentColor"
@@ -94,7 +94,7 @@
                     class="flex justify-between items-center w-full md:h-20 h-[4.5em] my-2"
                 >
                     <div
-                        class="flex w-full h-full border-b-4 border-2 rounded-lg shadow-md bg-white dark:bg-slate-700 p-2 border-slate-200 dark:border-slate-800"
+                        class="flex w-full h-full border-b-4 border-2 rounded-lg bg-white dark:bg-slate-700 p-2 border-slate-200 dark:border-slate-800"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 512" fill="currentColor"
@@ -131,7 +131,7 @@
                 <get-text :context="Lang.CreateTranslationContext('room', 'InviteInRoom')" />
             </title-text>
             <div class="flex flex-col items-center max-w-[20em] space-y-4 mb-4">
-                <p class="text-lg font-semibold text-slate-200">
+                <p class="text-lg font-semibold text-slate-600 dark:text-slate-200">
                     <get-text :context="Lang.CreateTranslationContext('room', 'YourInviteLink')" />
                 </p>
                 <input-text

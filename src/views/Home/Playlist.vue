@@ -1,16 +1,21 @@
 <template>
     <div class="flex flex-col items-center">
-        <div class="w-full py-2 px-4">
-            <input-text
-                orientation="row"
-                name="song-search"
-                :label="Lang.CreateTranslationContext('playlist', 'SearchSong')"
-            />
-            <selector
-                ref="song-selector"
-                :oncompletion="onSongCompletion"
-                :onclick="onSongSelected"
-            />
+        <div class="flex w-full py-2 px-4 space-x-2">
+            <div class="flex flex-col w-full">
+                <input-text
+                    orientation="row"
+                    name="song-search"
+                    :label="Lang.CreateTranslationContext('playlist', 'SearchSong')"
+                />
+                <selector
+                    ref="song-selector"
+                    :oncompletion="onSongCompletion"
+                    :onclick="onSongSelected"
+                />
+            </div>
+            <button class="m-auto py-1 hover:bg-slate-200 hover:dark:bg-slate-600 rounded-md transition-all">
+                <ellipsis-vertical-icon class="text-slate-800 dark:text-slate-200 w-6" />
+            </button>
         </div>
         <div class="flex w-full h-fit px-4">
             <span class="w-full rounded-full h-1 bg-slate-200 dark:bg-slate-600" />
@@ -109,6 +114,10 @@ import Selector from '../../components/inputs/Selector.vue';
 import EventManager from '../../scripts/EventManager';
 import User from '../../scripts/User';
 
+import {
+    EllipsisVerticalIcon
+} from '@heroicons/vue/24/outline';
+
 export default {
     name: "PlaylistView",
     components: {
@@ -116,7 +125,8 @@ export default {
         BaseText,
         InputText,
         Selector,
-        GetText
+        GetText,
+        EllipsisVerticalIcon
     },
     data() {
         return {

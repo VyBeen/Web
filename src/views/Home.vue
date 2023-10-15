@@ -3,7 +3,7 @@
         <div class="flex grow h-full max-h-full w-full h-[5em] justify-between items-center text-slate-400">
             <button
                 class="md:hidden flex w-8 mx-4"
-                :class="tab === 'room' ? 'text-white' : ''"
+                :class="tab === 'room' ? 'text-slate-800 dark:text-white' : ''"
                 @click="() => { tab = (tab === 'room' ? 'player' : 'room') }"
             >
                 <svg
@@ -27,7 +27,7 @@
             <h2 class="md:flex hidden mx-auto text-2xl font-bold text-slate-700 dark:text-slate-200"> Playlist </h2>
             <button
                 class="md:hidden flex w-8 mx-4"
-                :class="tab === 'playlist' ? 'text-white' : ''"
+                :class="tab === 'playlist' ? 'text-slate-800 dark:text-white' : ''"
                 @click="() => { tab = (tab === 'playlist' ? 'player' : 'playlist') }"
             >
                 <svg
@@ -45,7 +45,7 @@
             class="relative flex grow max-h-full min-h-0 w-full h-full"
         >
             <div
-                class="absolute flex max-h-full w-full h-full left-0 bg-slate-700 z-50 transition-all overflow-hidden"
+                class="absolute flex max-h-full w-full h-full left-0 bg-slate-50 dark:bg-slate-700 z-50 transition-all overflow-hidden"
                 :class="tab === 'room' ? 'max-w-[100vw]' : 'max-w-[0vw]'"
             >
                 <people class="flex max-h-full w-full h-full border-r-4 border-slate-200 dark:border-slate-600" />
@@ -57,7 +57,7 @@
                 <player class="flex max-h-full w-full h-full" />
             </div>
             <div
-                class="absolute flex max-h-full w-full h-full right-0 bg-slate-700 z-50 transition-all overflow-hidden"
+                class="absolute flex max-h-full w-full h-full right-0 bg-slate-50 dark:bg-slate-700 z-50 transition-all overflow-hidden"
                 :class="tab === 'playlist' ? 'max-w-[100vw]' : 'max-w-[0vw]'"
             >
                 <playlist class="flex max-h-full w-full h-full border-l-4 border-slate-200 dark:border-slate-600" />

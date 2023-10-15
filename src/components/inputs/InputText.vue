@@ -13,7 +13,7 @@
             <input
                 ref="input"
                 class="flex h-fit w-full border-2 rounded-md px-2 py-1 border-slate-200 dark:border-slate-600 font-bold text-md whitespace-nowrap max-w-full
-                    min-w-0 text-ellipsis transition-colors outline-2 outline-offset-2 outline-green-500 focus:outline placeholder-slate-400"
+                    min-w-0 text-ellipsis transition-colors outline-2 outline-offset-2 outline-green-500 focus:outline placeholder-slate-400 text-slate-500"
                 :class="additionnalClasses"
                 :placeholder="placeholder_str"
                 :type="type"
@@ -25,13 +25,13 @@
             >
             <button
                 v-if="showCopy"
-                class="bg-slate-600 border-2 border-slate-600 hover:border-slate-500 rounded-lg rounded-l-none transition-colors outline-none outline-offset-2 focus:outline-green-500"
+                class="bg-slate-200 dark:bg-slate-600 border-2 border-slate-200 dark:border-slate-600 hover:border-slate-500 hover:dark:border-slate-500 rounded-lg rounded-l-none transition-colors outline-none outline-offset-2 focus:outline-green-500"
                 @click="copy"
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     :viewBox="showCopyCheck ? '0 0 384 512' : '0 0 448 512'"
-                    class="text-slate-200 w-8 px-2"
+                    class="text-slate-700 dark:text-slate-200 w-8 px-2"
                     fill="currentColor"
                 >
                     <path
