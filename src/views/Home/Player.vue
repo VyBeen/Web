@@ -16,7 +16,7 @@
                         <div class="flex object-cover w-full h-full rounded-full bg-green-500/[0.1] justify-center items-center">
                             <img
                                 :src="coverSrc"
-                                alt="song cover"
+                                alt=" "
                                 class="flex w-full h-full object-cover rounded-full animate-roll items-center justify-center"
                             >
                         </div>

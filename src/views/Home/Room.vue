@@ -273,6 +273,7 @@ export default {
                 await Ressources.getRoom(true); // reload room in case owner changed
             case 'user.connected':
             case 'user.disconnected':
+                if (ev.data.user === User.CurrentUser.id) return;
                 this.people.find((u) => u.id === ev.data.user).connected = ev.type === 'user.connected';
                 break;
             case 'error':

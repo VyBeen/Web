@@ -91,6 +91,28 @@
                 </div>
             </div>
             <div
+                v-for="i in nbNewLoadingSongs"
+                :key="i"
+                class="flex song-card justify-between items-center w-full md:h-20 h-[4.5em] my-2"
+            >
+                <div
+                    class="flex md:w-16 w-12 h-16 md:p-4 p-2 items-center justify-center text-slate-500 transition-all"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" class="h-full items-center justify-center"
+                    >
+                        <path xmlns="http://www.w3.org/2000/svg" d="M352 192a32 32 0 1 0 64 0 32 32 0 1 0 -64 0zm-160 0a32 32 0 1 0 64 0 32 32 0 1 0 -64 0zM64 224a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm288 96a32 32 0 1 0 64 0 32 32 0 1 0 -64 0zM224 352a32 32 0 1 0 0-64 32 32 0 1 0 0 64zM32 320a32 32 0 1 0 64 0 32 32 0 1 0 -64 0z"/>
+                    </svg>
+                </div>
+                <div
+                    class="flex justify-center w-full h-full text-4xl text-slate-400 border-b-4 border-2 rounded-lg bg-white dark:bg-slate-700 p-2 p-2 border-slate-200/[0.5] dark:border-slate-800/[0.5]"
+                >
+                    <p class="mx-2 wowow-h" style="animation-delay: 000ms">.</p>
+                    <p class="mx-2 wowow-h" style="animation-delay: 200ms">.</p>
+                    <p class="mx-2 wowow-h" style="animation-delay: 400ms">.</p>
+                </div>
+            </div>
+            <div
                 v-if="songs.length === 0"
                 class="flex grow justify-center items-center"
             >
@@ -136,7 +158,8 @@ export default {
             dragging: false,
             dragTraget: null,
             lastFetchedSong: undefined,
-            searchTimeout: null
+            searchTimeout: null,
+            nbNewLoadingSongs: 0
         };
     },
     mounted() {
@@ -281,6 +304,7 @@ export default {
             })));
         },
         async onSongSelected(song) {
+            this.nbNewLoadingSongs++;
             const stream = await API.execute_logged(API.ROUTE.STREAM_SONG(song.obj.id), API.METHOD.POST);
 
             const playlist = await Ressources.getPlaylist();
@@ -289,6 +313,7 @@ export default {
                 ...song.obj,
                 url: stream.data
             });
+            this.nbNewLoadingSongs--;
         },
         async playSong(id) {
             const player = await Ressources.getPlayer();
@@ -337,3 +362,15 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+@keyframes wowow-h {
+    0%, 100% { transform: translateY(0); }
+    33% { transform: translateY(5%); }
+    66% { transform: translateY(-5%); }
+}
+
+.wowow-h {
+    animation: wowow-h 1s ease-in-out infinite;
+}
+</style>
