@@ -258,7 +258,18 @@ export default {
         
             case 'user.left':
             case 'user.kicked':
-                this.people = this.people.filter((u) => u.id !== (ev.data.target ?? ev.data.user));
+                console.log('user kicked event : ev.data.user=' + ev.data.target + ", User.CurrentUser.id=" + User.CurrentUser.id);
+                if (ev.data.target === User.CurrentUser.id) {
+                    console.log('getting kicked :(');
+                    API.execute_logged(API.ROUTE.USERS(User.CurrentUser.id)).then(res => {
+                        console.log('got informations: ', res.data);
+                        User.CurrentUser.setInformations(res.data);
+                        User.CurrentUser.save();
+                        this.$router.go();
+                    }).catch(err => { this.disconnect(); });
+                } else {
+                    this.people = this.people.filter((u) => u.id !== (ev.data.target ?? ev.data.user));
+                }
             case 'error':
                 if (ev.data === 'Already connected') {
                     this.disconnect();
