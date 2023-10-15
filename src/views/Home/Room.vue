@@ -259,6 +259,11 @@ export default {
             case 'user.left':
             case 'user.kicked':
                 this.people = this.people.filter((u) => u.id !== (ev.data.target ?? ev.data.user));
+            case 'error':
+                if (ev.data === 'Already connected') {
+                    this.disconnect();
+                }
+                break;
             default:
                 break;
             }

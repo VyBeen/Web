@@ -30,6 +30,8 @@
                     class="flex md:w-16 w-12 h-16 md:p-4 p-2 items-center justify-center text-slate-500 cursor-grab hover:text-slate-400 transition-all"
                     @mousedown="startDrag"
                     @mouseup="stopDrag"
+                    @touchstart="startDrag"
+                    @touchend="stopDrag"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" class="h-full items-center justify-center"
@@ -128,12 +130,12 @@ export default {
         };
     },
     mounted() {
-        window.addEventListener("mousemove", ev => {
-            if (this.dragging) { this.doDrag(ev); }
-        });
-        window.addEventListener("mouseup", ev => {
-            if (this.dragging) { this.stopDrag(ev); }
-        });
+        window.addEventListener("mousemove", ev => { if (this.dragging) { this.doDrag(ev); } });
+        window.addEventListener("touchmove", ev => { if (this.dragging) { this.doDrag(ev); } });
+
+        window.addEventListener("mouseup",  ev => { if (this.dragging) { this.stopDrag(ev); } });
+        window.addEventListener("touchend", ev => { if (this.dragging) { this.stopDrag(ev); } });
+
         this.fetchSongs(5);
         this.$refs["song-selector"].attachInput(this.$el.querySelector('input[name=song-search]'));
 
@@ -169,6 +171,7 @@ export default {
             this.fetchSongs(nbSongs - 1);
         },
         startDrag(ev) {
+            console.log('startDrag event !', ev);
             this.dragging = true;
             const songCard = this.getSongCard(ev.target);
             this.dragTraget = songCard;
@@ -179,10 +182,11 @@ export default {
             this.doDrag(ev);
         },
         async stopDrag(ev) {
+            console.log('stopDrag event !', ev);
             if (!this.dragTraget) return;
             const mouse = {
-                x: ev.clientX,
-                y: ev.clientY
+                x: ev.clientX ?? ev.changedTouches[0].clientX,
+                y: ev.clientY ?? ev.changedTouches[0].clientY
             };
 
             const container = this.$refs["songs-container"];
@@ -222,11 +226,12 @@ export default {
             this.dragTraget = null;
         },
         doDrag(ev) {
+            console.log('doDrag event !', ev);
             if (!this.dragTraget) return;
 
             const mouse = {
-                x: ev.clientX,
-                y: ev.clientY
+                x: ev.clientX ?? ev.touches[0].clientX,
+                y: ev.clientY ?? ev.touches[0].clientY
             };
 
             const container = this.$refs["songs-container"];
