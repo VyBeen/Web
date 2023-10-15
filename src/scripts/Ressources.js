@@ -50,6 +50,7 @@ class AwaitedObject {
 *  name: string,
 *  playlistId: number,
 *  playerId: number
+*  ownerId: number
 * }}
 */
 export async function getRoom(reload=false) {
@@ -155,6 +156,7 @@ export function fetchSong(id) {
 *  furwazId: number
 *  pseudo: string
 *  roomId: number
+* connected: boolean
 * }}
 */
 export async function getUser(id, reload=false) {

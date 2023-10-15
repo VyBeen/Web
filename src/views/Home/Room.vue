@@ -52,18 +52,18 @@
             <div class="flex flex-col h-fit">
                 <div class="flex justify-between items-center w-full md:h-20 h-[4.5em] my-2">
                     <div
-                        class="flex w-full h-full border-b-4 border-2 rounded-lg bg-white dark:bg-slate-700 p-2 border-slate-200 dark:border-slate-800"
+                        class="flex w-full h-full border-b-4 text-slate-600 dark:text-slate-200 border-slate-300 dark:border-slate-900 border-2 rounded-lg bg-white dark:bg-slate-700 p-2"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 512" fill="currentColor"
-                            class="h-full items-center justify-center text-slate-400 w-8 mx-3"
+                            class="h-full items-center justify-center w-8 mx-3"
                         >
                             <path xmlns="http://www.w3.org/2000/svg" d="M320 128a96 96 0 1 0 -192 0 96 96 0 1 0 192 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM32 480H416c-1.2-79.7-66.2-144-146.3-144H178.3c-80 0-145 64.3-146.3 144zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3z"/>
                         </svg>
                         <div class="flex items-center w-full overflow-hidden">
-                            <title-text class="w-fit text-center"> {{ User.CurrentUser.pseudo }} </title-text>
+                            <p class="text-xl md:text-2xl font-semibold w-fit text-center"> {{ User.CurrentUser.pseudo }} </p>
                         </div>
-                        <div class="flex w-fit h-full items-center justify-end text-slate-400 space-x-2">
+                        <div class="flex w-fit h-full items-center justify-end space-x-2">
                             <button
                                 class="flex h-10 w-10 p-1.5 rounded-md justify-center hover:bg-slate-100 dark:hover:bg-slate-600 hover:text-red-500 transition-all"
                                 @click="disconnect"
@@ -94,18 +94,19 @@
                     class="flex justify-between items-center w-full md:h-20 h-[4.5em] my-2"
                 >
                     <div
-                        class="flex w-full h-full border-b-4 border-2 rounded-lg bg-white dark:bg-slate-700 p-2 border-slate-200 dark:border-slate-800"
+                        class="flex w-full h-full border-b-4 border-2 rounded-lg bg-white dark:bg-slate-700 p-2 transition-all"
+                        :class="user.connected? 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800': 'text-slate-400 dark:text-slate-500 border-slate-100 dark:border-slate-800/[0.5]'"
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 512" fill="currentColor"
-                            class="h-full items-center justify-center text-slate-400 w-8 mx-3"
+                            class="h-full items-center justify-center w-8 mx-3"
                         >
                             <path xmlns="http://www.w3.org/2000/svg" d="M320 128a96 96 0 1 0 -192 0 96 96 0 1 0 192 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM32 480H416c-1.2-79.7-66.2-144-146.3-144H178.3c-80 0-145 64.3-146.3 144zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3z"/>
                         </svg>
                         <div class="flex items-center w-full overflow-hidden">
-                            <title-text class="w-fit text-center"> {{ user.pseudo }} </title-text>
+                            <p class="text-xl md:text-2xl font-semibold w-fit text-center"> {{ user.pseudo }} </p>
                         </div>
-                        <div class="flex w-fit h-full items-center justify-end text-slate-400 space-x-2">
+                        <div class="flex w-fit h-full items-center justify-end space-x-2">
                             <button
                                 class="flex h-10 w-10 p-1.5 rounded-md justify-center hover:bg-slate-100 dark:hover:bg-slate-600 hover:text-red-500 transition-all"
                                 @click="kickUser(user.id)"
@@ -179,7 +180,8 @@ export default {
             name: "- - - -",
             editingName: false,
             pagination: API.createPagination(0, 6),
-            window
+            window,
+            room: null
         };
     },
     watch: {
@@ -196,6 +198,7 @@ export default {
         this.fetchRoomUsers();
 
         EventManager.Instance.addListener(this.onEvent);
+        Ressources.getRoom().then((room) => { this.room = room; });
     },
     methods: {
         async fetchRoomInformations() {
@@ -258,11 +261,8 @@ export default {
         
             case 'user.left':
             case 'user.kicked':
-                console.log('user kicked event : ev.data.user=' + ev.data.target + ", User.CurrentUser.id=" + User.CurrentUser.id);
                 if (ev.data.target === User.CurrentUser.id) {
-                    console.log('getting kicked :(');
                     API.execute_logged(API.ROUTE.USERS(User.CurrentUser.id)).then(res => {
-                        console.log('got informations: ', res.data);
                         User.CurrentUser.setInformations(res.data);
                         User.CurrentUser.save();
                         this.$router.go();
@@ -270,6 +270,11 @@ export default {
                 } else {
                     this.people = this.people.filter((u) => u.id !== (ev.data.target ?? ev.data.user));
                 }
+                await Ressources.getRoom(true); // reload room in case owner changed
+            case 'user.connected':
+            case 'user.disconnected':
+                this.people.find((u) => u.id === ev.data.user).connected = ev.type === 'user.connected';
+                break;
             case 'error':
                 if (ev.data === 'Already connected') {
                     this.disconnect();

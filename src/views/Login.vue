@@ -22,6 +22,7 @@
                     <title-text class="text-center"> <get-text :context="Lang.CreateTranslationContext('login', 'Title')" /> </title-text>
                     <base-text class="text-center"> <get-text :context="Lang.CreateTranslationContext('login', 'Desc')" /> </base-text>
                     <button-block
+                        :disabled="loginBtnDisabled"
                         color="green"
                         :onclick="login"
                     >
@@ -75,7 +76,8 @@ export default {
         return {
             Lang,
             User,
-            mode: 'login'
+            mode: 'login',
+            loginBtnDisabled: false
         };
     },
     mounted() {
@@ -97,6 +99,7 @@ export default {
             this.$router.go(-1);
         },
         async login() {
+            this.loginBtnDisabled = true;
             const response = await API.execute(API.ROUTE.TOKEN());
             const token = response.data;
 

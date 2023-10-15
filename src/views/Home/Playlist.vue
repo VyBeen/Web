@@ -181,7 +181,6 @@ export default {
             this.fetchSongs(nbSongs - 1);
         },
         startDrag(ev) {
-            console.log('startDrag event !', ev);
             this.dragging = true;
             const songCard = this.getSongCard(ev.target);
             this.dragTraget = songCard;
@@ -192,7 +191,6 @@ export default {
             this.doDrag(ev);
         },
         async stopDrag(ev) {
-            console.log('stopDrag event !', ev);
             if (!this.dragTraget) return;
             const mouse = {
                 x: ev.clientX ?? ev.changedTouches[0].clientX,
@@ -236,7 +234,6 @@ export default {
             this.dragTraget = null;
         },
         doDrag(ev) {
-            console.log('doDrag event !', ev);
             if (!this.dragTraget) return;
 
             const mouse = {

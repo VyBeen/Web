@@ -106,6 +106,7 @@ import BaseText from '../../components/text/BaseText.vue';
 import * as Ressources from '../../scripts/Ressources';
 import API from '../../scripts/API';
 import EventManager from '../../scripts/EventManager';
+import User from '../../scripts/User';
 
 const STATE = {
     PLAYING: "playing",
@@ -180,6 +181,23 @@ export default {
                 audioSource.currentTime = this.getProgressInSeconds();
             });
             this.loadSongStream();
+
+            audioSource.addEventListener('ended', async ev => {
+                const room = await Ressources.getRoom();
+                const userId = User.CurrentUser.id;
+
+                if (room.ownerId === userId) {
+                    this.onNextClicked();
+                } else {
+                    const owner = await Ressources.getUser(room.ownerId);
+                    if (!owner.connected) {
+                        const users = await API.execute_logged(API.ROUTE.ROOMUSERS(User.CurrentUser.roomId));
+                        if (users.data.items.length < 0 || users.data.items[0].id === User.CurrentUser.id) {
+                            this.onNextClicked();
+                        }
+                    }
+                }
+            });
         }).catch(err => {
             console.error(err); // TODO : display error
         });
