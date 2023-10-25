@@ -62,7 +62,7 @@ export default {
             required: false
         },
         placeholder: {
-            type: Object,
+            type: [Object, String],
             default: () => null,
             required: false
         },

@@ -13,7 +13,10 @@
                     :onclick="onSongSelected"
                 />
             </div>
-            <button class="m-auto py-1 hover:bg-slate-200 hover:dark:bg-slate-600 rounded-md transition-all">
+            <button
+                class="m-auto py-1 hover:bg-slate-200 hover:dark:bg-slate-600 rounded-md transition-all"
+                @click="openIntegrations"
+            >
                 <ellipsis-vertical-icon class="text-slate-800 dark:text-slate-200 w-6" />
             </button>
         </div>
@@ -121,6 +124,9 @@
                 </title-text>
             </div>
         </div>
+        <modal-card ref="modal-card">
+            <integrations-view ref="integrations" />
+        </modal-card>
     </div>
 </template>
 
@@ -134,7 +140,9 @@ import Lang from '../../scripts/Lang';
 import API from '../../scripts/API';
 import Selector from '../../components/inputs/Selector.vue';
 import EventManager from '../../scripts/EventManager';
+import ModalCard from '../../components/cards/ModalCard.vue';
 import User from '../../scripts/User';
+import IntegrationsView from './IntegrationsView.vue';
 
 import {
     EllipsisVerticalIcon
@@ -148,7 +156,9 @@ export default {
         InputText,
         Selector,
         GetText,
-        EllipsisVerticalIcon
+        EllipsisVerticalIcon,
+        ModalCard,
+        IntegrationsView
     },
     data() {
         return {
@@ -169,7 +179,7 @@ export default {
         window.addEventListener("mouseup",  ev => { if (this.dragging) { this.stopDrag(ev); } });
         window.addEventListener("touchend", ev => { if (this.dragging) { this.stopDrag(ev); } });
 
-        this.fetchSongs(5);
+        this.fetchSongs(64);
         this.$refs["song-selector"].attachInput(this.$el.querySelector('input[name=song-search]'));
 
         Ressources.getPlayer().then(player => {
@@ -358,6 +368,10 @@ export default {
         },
         async onSongRemoved(id) {
             this.songs = this.songs.filter(song => song.id !== id);
+        },
+        openIntegrations() {
+            this.$refs['modal-card'].open();
+            this.$refs['integrations'].displaytab();
         }
     }
 }

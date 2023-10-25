@@ -150,7 +150,6 @@
 <script>
 import TitleText from '../../components/text/TitleText.vue';
 import ButtonBlock from '../../components/inputs/ButtonBlock.vue';
-import ButtonText from '../../components/inputs/ButtonText.vue';
 import User from '../../scripts/User';
 import GetText from '../../components/text/GetText.vue';
 import Lang from '../../scripts/Lang';

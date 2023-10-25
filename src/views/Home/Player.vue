@@ -11,13 +11,16 @@
                     class="absolute w-full h-full rounded-full"
                     style="transform: rotate(-90deg)"
                 />
-                <div class="absolute flex w-full h-full p-2">
+                <div
+                    ref="song-slider"
+                    class="absolute flex w-full h-full p-2"
+                >
                     <div class="flex w-full h-full rounded-full bg-white dark:bg-slate-700 p-2">
                         <div class="flex object-cover w-full h-full rounded-full bg-green-500/[0.1] justify-center items-center">
                             <img
                                 :src="coverSrc"
                                 alt=" "
-                                class="flex w-full h-full object-cover rounded-full animate-roll items-center justify-center"
+                                class="flex w-full h-full object-cover rounded-full animate-roll items-center justify-center drag-none"
                             >
                         </div>
                     </div>
@@ -151,7 +154,25 @@ export default {
         setInterval(() => {
             this.displayedProgress = this.getDisplayTime(this.getProgressInSeconds());
             this.displayedLength = this.getDisplayTime(this.length);
-        }, 500);
+        }, 100);
+
+        const songSlider = this.$refs['song-slider'];
+        let lastPosition = 0;
+        songSlider.addEventListener('touchstart', ev => { lastPosition = ev.touches[0].clientX; });
+        songSlider.addEventListener('touchmove', ev => {
+            const progress = this.calculatePosition() / this.length;
+            const delta = (ev.touches[0].clientX - lastPosition) / (songSlider.clientWidth * 4);
+            this.position = (progress + delta) * this.length;
+            this.cursorDate = new Date();
+            lastPosition = ev.touches[0].clientX;
+        });
+        songSlider.addEventListener('touchend', ev => {
+            const progress = this.calculatePosition() / this.length;
+            const audioSource = this.getAudioSource();
+            const time = progress * audioSource.duration;
+            audioSource.setEventFlag();
+            audioSource.currentTime = time;
+        });
 
         const promises = [
             this.fetchPlayerInformations(),
@@ -216,12 +237,15 @@ export default {
                 audioSource.play();
             }
         },
+        calculatePosition() {
+            return this.position + (new Date() - this.cursorDate) / 1000;
+        },
         getProgressInSeconds() {
             return Math.max(
                 Math.min(
                     this.getAudioSource()?.paused
                         ? this.position
-                        : (this.position + (new Date() - this.cursorDate) / 1000),
+                        : this.calculatePosition(),
                     this.length
                 ),
                 0
@@ -271,7 +295,6 @@ export default {
             canvas.width = 256;
             canvas.height = 256;
             document.body.appendChild(canvas);
-            const ctx = canvas.getContext("2d");
 
             navigator.mediaSession.metadata = new MediaMetadata({
                 title: song.title,
@@ -393,7 +416,7 @@ export default {
             if (!source.hasEventFlag) {
                 source.hasEventFlag = () => {
                     const res = source.eventFlag;
-                    source.eventFlag--;
+                    source.eventFlag = source.eventFlag > 0 ? source.eventFlag - 1 : 0;
                     return res === 0;
                 }
                 source.unsetEventFlag = () => {
@@ -411,8 +434,15 @@ export default {
 
             const type = typeSplit[1];
             const audioSource = this.getAudioSource();
+            if (!audioSource) return;
 
             switch (type) {
+            case 'moved':
+                this.position = ev.data.position;
+                this.cursorDate = new Date(ev.data.cursorDate);
+                audioSource.unsetEventFlag();
+                audioSource.currentTime = this.getProgressInSeconds();
+                break;
             case 'played':
                 this.position = ev.data.position;
                 this.cursorDate = new Date(ev.data.cursorDate);

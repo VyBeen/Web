@@ -58,6 +58,10 @@
     }
 }
 
+html, head, body {
+    height: 100%;
+}
+
 .show-up {
     opacity: 0;
     animation: show-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 0.8) forwards;
@@ -102,6 +106,3 @@
     opacity: 0;
     animation: show-jump 1s forwards cubic-bezier(0.5, 0, 0, 0.5);
 }
-
-.w-inherit { width: inherit; }
-.h-inherit { height: inherit; }
