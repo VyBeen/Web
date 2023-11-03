@@ -416,14 +416,14 @@ export default {
             if (!source.hasEventFlag) {
                 source.hasEventFlag = () => {
                     const res = source.eventFlag;
-                    source.eventFlag = source.eventFlag > 0 ? source.eventFlag - 1 : 0;
-                    return res === 0;
+                    source.eventFlag = Math.max(source.eventFlag - 1, 0);
+                    return res > 0;
                 }
                 source.unsetEventFlag = () => {
-                    source.eventFlag++;
+                    source.eventFlag = 0;
                 }
                 source.setEventFlag = () => {
-                    source.eventFlag = 0;
+                    source.eventFlag ++;
                 }
             }
             return source;

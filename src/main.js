@@ -13,6 +13,7 @@ import "./index.css";
 const routes = [
     { path: "/", name: "Home", component: () => import("./views/Home.vue"), condition: () => User.CurrentUser !== null },
     { path: "/login", name: "Login", component: () => import("./views/Login.vue") },
+    { path: "/playground", name: "Playground", component: () => import("./views/Home/Integrations/DeezerView.vue") },
     { path: "/invite/:room", name: "Invite", component: () => import("./views/Invite.vue") },
     { path: '/:catchAll(.*)', name: 'NotFound', component: () => import("./views/NotFound.vue"),}
 ];

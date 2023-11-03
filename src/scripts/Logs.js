@@ -63,7 +63,7 @@ class Log {
 
     update(msg, type, animate=true) {
         this.setText(msg, animate);
-        this.setType(type);
+        if (type) this.setType(type);
     }
 
     async error(err) {
