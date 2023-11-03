@@ -303,6 +303,12 @@ export default {
                     { src: song.cover, sizes: '256x256', type: 'image/jpg' }
                 ]
             });
+            navigator.mediaSession.setActionHandler('nexttrack', ev => {
+                this.onNextClicked();
+            });
+            navigator.mediaSession.setActionHandler('previoustrack', ev => {
+                this.onPrevClicked();
+            });
         },
         getDisplayTime(time) {
             const minutes = Math.floor(time / 60);
