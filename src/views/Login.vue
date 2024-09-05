@@ -60,7 +60,7 @@ import IconCard from '../components/cards/IconCard.vue';
 import User from '../scripts/User';
 import API from '../scripts/API';
 
-import 'https://cdn.furwaz.fr/api/portal.min.js';
+import 'https://cdn.furwaz.com/api/portal.min.js';
 
 export default {
     name: "LoginVue",
