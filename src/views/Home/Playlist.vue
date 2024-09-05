@@ -239,6 +239,8 @@ export default {
             })));
         },
         async onSongSelected(song) {
+            if (!song) return;
+
             const addedSong = {
                 id: null,
                 view: null,

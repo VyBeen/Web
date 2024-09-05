@@ -117,7 +117,8 @@ export default {
         },
         playingId: {
             type: Number,
-            required: true
+            required: false,
+            default: null
         }
     },
     mounted() {
